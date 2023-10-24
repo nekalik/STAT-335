@@ -11,13 +11,15 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Phase 1
+
 ```{r}
 # loading time series packages
 library(xts)
 library(astsa)
 ```
 
-# Data
+## Data
 
 ```{r}
 # reading in csv file to R as "delays" dataframe
@@ -30,7 +32,7 @@ str(delays)
 head(delays)
 ```
 
-# Data description
+## Data description
 
 The dataset describes U.S. flight delays from January 2017 - July 2022. Some variables included are the year and month of data collection, airline carrier, airport, the number of flights delayed due to a specific reason (air carrier, weather, National Aviation System, security issue, previous flight delayed), and the total time (minutes) of delay due to a specific reason.
 
@@ -42,7 +44,7 @@ The original source of the Kaggle.com data:
 
 U.S. Department of Transportation: Bureau of Transportation Statistics (BTS), 2022. *"Airline On-Time Statistics and Delay Causes."* BTS website, https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp.
 
-# Research question
+## Research question
 
 **What is the relationship between the month and the number and nature of delays?**
 
@@ -50,11 +52,7 @@ For example:
 
 Do the primary causes of delays vary from month to month? Is there a dominant reason that causes the most delays? Are certain months associated with a certain kind of delay? How does the month impact how many total delays there are?
 
-```{R}
-
-```
-
-
+# Phase 2
 
 ```{R}
 delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
