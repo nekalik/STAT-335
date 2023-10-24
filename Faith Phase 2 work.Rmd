@@ -1,0 +1,36 @@
+---
+title: "Faith Phase 2 work"
+author: "Faith Wong"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# reading in csv file to R as "delays" dataframe
+delays <- read.csv("/Users/faithwong/Downloads/Fall 2023/STAT 335/Course project/Airline_Delay_Cause.csv")
+```
+
+```{r}
+# adding column for date
+delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
+```
+
+```{r}
+# moving date column to the first position
+library(dplyr)
+delays <- delays %>%
+  select(date, everything())
+```
+
+```{r}
+# delays_num contains only numerical data (categorical variables removed)
+delays_num <- delays[,-c(2:7)]
+# subset delays_num to only contain data before Covid (January 2017-December 2019)
+delays_num <- delays_num[delays_num$date<"2020-01-01",]
+# finding mean of all columns for each day
+delays_sum <- aggregate(.~date, delays_num,mean)
+```
