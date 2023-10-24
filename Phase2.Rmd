@@ -90,12 +90,14 @@ tsplot(numflight$date, numflight$arr_del15)
 
 
 ```{R}
-
+# removing categorical columns
 sub_delays = delays[-(3:6)]
 head(delays)
 head(sub_delays)
+# finding mean of each column by date
 summary_delays= aggregate(.~date, sub_delays,mean)
 head(summary_delays)
+# isolating data to pre-Covid only (January 2017-December 2019)
 summary_delays = summary_delays[summary_delays$date<'2020-01-01', ]
 ```
 
