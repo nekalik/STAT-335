@@ -23,7 +23,7 @@ library(astsa)
 
 ```{r}
 # reading in csv file to R as "delays" dataframe
-delays <- read.csv("Airline_Delay_Cause.csv")
+delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv")
 ```
 
 ```{r}
@@ -54,30 +54,41 @@ Do the primary causes of delays vary from month to month? Is there a dominant re
 
 # Phase 2
 
+
 ```{R}
+#read in dataset
 delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
 head(delays)
 ```
 
 ```{R}
+#find the mean of delay at each time point
 totime = aggregate(arr_delay~date, delays,mean )
 head(totime)
+```
+
+```{R}
+#plot
 tsplot(totime$date, totime$arr_delay)
 
+```
+
+```{R}
+#basic regression model
 lm = lm(arr_delay~date, data = totime)
 summary(lm)
 
 ```
 
-```{R}
-w = rnorm(n = 400, mean= 5000, sd = 1) # 50 extra to avoid startup problems
-x = filter(w, filter=c(1.7,-.70), 
-           method="recursive")[-(1:100)]
-tsplot(x, main="autoregression", col=4)
-```
+<!-- ```{R} -->
+<!-- w = rnorm(n = 400, mean= 5000, sd = 1) # 50 extra to avoid startup problems -->
+<!-- x = filter(w, filter=c(1.7,-.70),  -->
+<!--            method="recursive")[-(1:100)] -->
+<!-- tsplot(x, main="autoregression", col=4) -->
+<!-- ``` -->
 
 ```{R}
-acf(totime$arr_delay)
+#ACF of SLR
 acf1(totime$arr_delay, max.lag = 48)
 ```
 
@@ -149,6 +160,15 @@ acf1(diff(summary_delays$arr_flights),30)
 
 ```
 
+
+```{R}
+trend = lm(arr_del15~date + arr_flights, data = summary_delays)
+summary(trend)
+tsplot(summary_delays$date, summary_delays$arr_del15)
+abline(trend,col="red")
+par(mfrow=c(2,2)) 
+plot(trend)
+```
 
 
 
