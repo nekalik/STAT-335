@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-# reading in csv file from Github to R as "delays" dataframe
+# reading in csv file from GitHub to R as "delays" dataframe
 delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv")
 ```
 
@@ -34,6 +34,7 @@ delays_num <- delays_num[delays_num$date<"2020-01-01",]
 # finding mean of all columns for each day
 delays_sum <- aggregate(.~date, delays_num,mean)
 ```
+
 
 
 
