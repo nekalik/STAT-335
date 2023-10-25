@@ -35,3 +35,4 @@ delays_num <- delays_num[delays_num$date<"2020-01-01",]
 delays_sum <- aggregate(.~date, delays_num,mean)
 ```
 
+
