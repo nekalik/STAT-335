@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # reading in csv file to R as "delays" dataframe
-delays <- read.csv("/Users/faithwong/Downloads/Fall 2023/STAT 335/Course project/Airline_Delay_Cause.csv")
+delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv")
 ```
 
 ```{r}
