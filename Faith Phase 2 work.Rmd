@@ -34,3 +34,4 @@ delays_num <- delays_num[delays_num$date<"2020-01-01",]
 # finding mean of all columns for each day
 delays_sum <- aggregate(.~date, delays_num,mean)
 ```
+
