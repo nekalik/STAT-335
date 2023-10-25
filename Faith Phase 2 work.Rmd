@@ -17,6 +17,7 @@ delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/m
 ```{r}
 # adding column for date
 delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
+str(delays)
 ```
 
 ```{r}
@@ -24,17 +25,31 @@ delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
 library(dplyr)
 delays <- delays %>%
   select(date, everything())
+str(delays)
 ```
 
 ```{r}
 # delays_num contains only numerical data (categorical variables removed)
-delays_num <- delays[,-c(2:7)]
-# subset delays_num to only contain data before Covid (January 2017-December 2019)
-delays_num <- delays_num[delays_num$date<"2020-01-01",]
+delays_num <- subset(delays, select = -c(year,month,carrier,carrier_name,airport,airport_name))
+str(delays_num)
 # finding mean of all columns for each day
 delays_sum <- aggregate(.~date, delays_num,mean)
+head(delays_sum)
+# subset dataframe to only contain data before Covid (January 2017-December 2019)
+delays_sum <- delays_sum[delays_sum$date<"2020-01-01",]
+tail(delays_sum)
 ```
 
+# Trying things from Shan's code
+
+```{r}
+corrdel <- delays_sum[,3:8] # number of flights delayed
+str(corrdel)
+
+# looking at the makeup of number of flights delayed (due to what reason) - is this statistically sound??
+library(corrplot)
+corrplot(cor(corrdel))
+```
 
 
 
