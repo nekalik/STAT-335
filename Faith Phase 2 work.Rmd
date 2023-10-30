@@ -32,9 +32,17 @@ delays_num <- delays[,-c(2:7)]
 # subset delays_num to only contain data before Covid (January 2017-December 2019)
 delays_num <- delays_num[delays_num$date<"2020-01-01",]
 # finding mean of all columns for each day
-delays_sum <- aggregate(.~date, delays_num,mean)
+delays_sum <- aggregate(.~date, delays_num,sum)
 ```
 
 
+```{r}
+sum_delays= aggregate(.~date, sub_delays,sum)
+head(sum_delays)
+
+#plot the trend of total number of flights that is more than 15 min late 
+#look rough the same as plotting arr_delay, so for now on the doc, we use arr_delay (why this over other?)
+tsplot(delays_sum$date, delays_sum$arr_del15)
+```
 
 
