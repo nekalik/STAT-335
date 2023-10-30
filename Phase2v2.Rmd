@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 title: "STAT 335 Project Phase 2"
 author: "Shan Sun, Faith Wong"
@@ -217,3 +218,224 @@ plot(trend)
 
 
 
+=======
+---
+title: "STAT 335 Project Phase 2"
+author: "Shan Sun, Faith Wong"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Phase 1
+
+```{r, include=false}
+# loading time series packages
+library(xts)
+library(astsa)
+```
+
+## Data
+
+```{r}
+# reading in csv file to R as "delays" dataframe
+delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv")
+```
+
+```{r}
+# first look at data
+str(delays)
+head(delays)
+```
+## Data description
+
+Jawad Khattak, 2022. *"Flight Delay from January 2017 - July 2022."* Kaggle.com, https://www.kaggle.com/datasets/jawadkhattak/us-flight-delay-from-january-2017-july-2022
+
+
+## Research question
+
+**What is the relationship between the month and the number and nature of delays?**
+
+For example:
+
+Do the primary causes of delays vary from month to month? Is there a dominant reason that causes the most delays? Are certain months associated with a certain kind of delay? How does the month impact how many total delays there are?
+
+# Phase 2
+
+Add Dates
+```{R}
+delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
+head(delays)
+```
+
+Eliminate categorical variable 
+```{R}
+sub_delays = delays[-(3:6)]
+head(sub_delays)
+```
+
+## Sum delay for each month
+```{R}
+# finding sum of each column by date
+sum_delays= aggregate(.~date, sub_delays,sum)
+head(sum_delays)
+
+#plot the trend of total number of flights that is more than 15 min late 
+#look rough the same as plotting arr_delay, so for now on the doc, we use arr_delay (why this over other?)
+tsplot(sum_delays$date, sum_delays$arr_del15)
+
+```
+SLR 
+```{R}
+#plot, total delay in mins 
+tsplot(sum_delays$date, sum_delays$arr_delay)
+
+#basic regression model
+lm = lm(arr_delay~date, data = sum_delays)
+summary(lm)
+
+#ACF of SLR
+acf1(sum_delays$arr_delay, max.lag = 48)
+
+```
+
+## Mean delay for each month
+```{R}
+
+mean_delays= aggregate(.~date, sub_delays,mean)
+
+```
+
+SLR
+
+```{R}
+#plot
+tsplot(mean_delays$date, mean_delays$arr_delay)
+
+#basic regression model
+lm = lm(arr_delay~date, data = mean_delays)
+summary(lm)
+
+#ACF of SLR
+acf1(mean_delays$arr_delay, max.lag = 48)
+
+```
+## Focus on pre-covid
+```{R}
+# isolating data to pre-Covid only (January 2017-December 2019)
+sum_delays_pre = sum_delays[sum_delays$date<'2020-01-01', ]
+
+mean_delays_pre = mean_delays[mean_delays$date<'2020-01-01', ]
+
+```
+
+Plot
+```{R}
+#different trends here, wonder why 
+par(mfrow = c(1,2))
+ts.plot(sum_delays_pre$arr_delay)
+ts.plot(mean_delays_pre$arr_delay)
+
+```
+
+
+<!-- Plot -->
+<!-- ```{R} -->
+<!-- #different trends here, wonder why  -->
+<!-- par(mfrow = c(1,2)) -->
+<!-- ts.plot(sum_delays_pre$arr_del15) -->
+<!-- ts.plot(mean_delays_pre$arr_del15) -->
+
+<!-- ``` -->
+
+SLR 
+```{R}
+#SLR of pre-covid data
+trend = lm(arr_delay~date, data = sum_delays_pre)
+summary(trend)
+
+#plot data and trend
+tsplot(sum_delays_pre$date, sum_delays_pre$arr_delay)
+abline(trend,col="red")
+
+#plot residual
+par(mfrow=c(2,2)) 
+plot(trend)
+```
+SLR 
+```{R}
+#SLR of pre-covid data
+trend = lm(arr_delay~date, data = mean_delays_pre)
+summary(trend)
+
+#plot data and trend
+tsplot(mean_delays_pre$date, mean_delays_pre$arr_delay)
+abline(trend,col="red")
+
+#plot residual
+par(mfrow=c(2,2)) 
+plot(trend)
+```
+
+Only got through here
+
+
+```{R}
+#Check hetero and does not help
+test = lm(log(arr_flights)~date, data = summary_delays)
+summary(test)
+
+tsplot(summary_delays$date, log(summary_delays$arr_flights))
+abline(test,col="red")
+
+par(mfrow=c(2,2)) 
+plot(test)
+```
+
+```{R}
+library(corrplot)
+corrplot(cor(summary_delays[-(1:3)]))
+```
+
+```{R}
+#detrending
+tsplot(resid(trend))
+acf1(resid(trend),30)
+
+
+```
+
+```{R}
+
+#differencing
+tsplot(diff(summary_delays$arr_flights))
+acf1(diff(summary_delays$arr_flights),30)
+
+```
+
+
+```{R}
+
+summary_delays[19] = c(1:36)
+
+smooth = lowess(summary_delays$arr_del15, f=.4)
+
+tsplot(smooth)
+summary_delays[20] = smooth[2]
+head(summary_delays)
+trend = lm(x~V19 + arr_flights, data = summary_delays)
+summary(trend)
+tsplot(summary_delays$date, summary_delays$x)
+lines(63.44,-0.56,0.0510,col="red")
+par(mfrow=c(2,2)) 
+plot(trend)
+```
+
+
+
+>>>>>>> df04653e4f2bf71ff461f331eedf40bcb545443b
