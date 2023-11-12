@@ -1,0 +1,110 @@
+---
+title: "STAT 335 Project Phase 2"
+author: "Shan Sun, Faith Wong"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Background
+
+```{r}
+# loading time series packages
+library(xts)
+library(astsa)
+```
+
+```{r}
+# reading in csv file to R as "delays" dataframe
+delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv")
+```
+
+To restate from the Phase 1 submission:
+
+- Data description: Flight delays from January 2017 - July 2022
+
+- Research question: What is the relationship between the month and the number and nature of delays?
+
+# Data Cleaning/Organization
+
+## Add dates
+
+The data had one column for the year and one column for the month, so we created a new column that combined them.
+
+```{R}
+delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
+head(delays)
+```
+
+# Step 1: Overall Delays
+
+We began our exploratory data analysis by looking at overall delays over the dataset's entire time frame. 
+
+## Aggregation
+
+Since each date had multiple entries, we needed to aggregate the data so there would be only one row of values for each month. 
+
+To do this, we first eliminate categorical variables such as carrier and airport (hard to perform aggregation on these).
+
+```{R}
+sub_delays = delays[-(3:6)]
+head(sub_delays)
+```
+
+Next, we aggregated the data based on each column's sum.
+
+```{R}
+# finding sum of each column by date
+sum_delays= aggregate(.~date, sub_delays,sum)
+head(sum_delays)
+```
+
+```{r}
+#plot the trend of total number of flights that is more than 15 min late 
+#look rough the same as plotting arr_delay, so for now on the doc, we use arr_delay (why this over other?)
+tsplot(sum_delays$date, sum_delays$arr_del15)
+```
+
+
+SLR 
+```{R}
+#plot, total delay in mins 
+tsplot(sum_delays$date, sum_delays$arr_delay)
+
+#basic regression model
+lm = lm(arr_delay~date, data = sum_delays)
+summary(lm)
+
+#ACF of SLR
+acf1(sum_delays$arr_delay, max.lag = 48)
+
+```
+
+aggregated on each column's mean
+
+```{R}
+# finding mean of each column by date
+mean_delays= aggregate(.~date, sub_delays,mean)
+head(mean_delays)
+```
+
+SLR
+
+```{R}
+#plot
+tsplot(mean_delays$date, mean_delays$arr_delay)
+
+#basic regression model
+lm = lm(arr_delay~date, data = mean_delays)
+summary(lm)
+
+#ACF of SLR
+acf1(mean_delays$arr_delay, max.lag = 48)
+
+```
+
