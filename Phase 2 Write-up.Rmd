@@ -64,19 +64,9 @@ sum_delays= aggregate(.~date, sub_delays,sum)
 head(sum_delays)
 ```
 
-To explore another aggregation method, the data was also aggregated based on mean.
-
-```{R}
-# finding mean of each column by date
-mean_delays= aggregate(.~date, sub_delays,mean)
-head(mean_delays)
-```
-
 ## Data exploration
 
-We played around with both of the aggregation methods and tried to get a better idea of delays as a whole. To measure delays, we looked at both the number of delays as well as how much planes were delayed.
-
-Using sum aggregation:
+We played around with the aggregated data and tried to get a better idea of delays as a whole. To measure delays, we looked at both the number of delays as well as how much planes were delayed.
 
 ```{r}
 #plot the total number of delayed flights over time
@@ -84,34 +74,27 @@ tsplot(sum_delays$date, sum_delays$arr_del15)
 
 #plot the total delay in mins over time
 tsplot(sum_delays$date, sum_delays$arr_delay)
+```
 
-#basic regression model - delay in minutes
-lm = lm(arr_delay~date, data = sum_delays)
-summary(lm)
+The two time series plots look approximately the same visually, which makes sense because the total delay in minutes is dependent on how many delays there are. Thus, we can analyze either measure to understand flight delays over time.
 
+```{r}
 #ACF of delay in minutes
 acf1(sum_delays$arr_delay, max.lag = 48)
 ```
 
-Using mean aggregation:
+The ACF isn't strongly indicative of a certain time series model... perhaps the dip from 2020-2021 is impacting it. We will elaborate below.
 
-```{R}
-#plot the total number of delayed flights over time
-tsplot(mean_delays$date,mean_delays$arr_del15)
-
-#plot the total delay in mins over time
-tsplot(mean_delays$date, mean_delays$arr_delay)
-
+```{r}
 #basic regression model - delay in minutes
-lm = lm(arr_delay~date, data = mean_delays)
+lm = lm(arr_delay~date, data = sum_delays)
 summary(lm)
-
-#ACF of delay in minutes
-acf1(mean_delays$arr_delay, max.lag = 48)
 ```
 
-As we can see from the R-squared values, the regression models don't fit the data very well, likely due to the big dip seen in the time series plots starting around 2020. It is reasonable to assume that COVID-19 has drastically impacted air travel in the U.S. 
+As we can see from the R-squared value, the regression model doesn't fit the data very well, likely due to the big dip seen in the time series plots starting around 2020. It is reasonable to assume that COVID-19 has drastically impacted air travel in the U.S. 
 
 Since it is difficult to "remove" COVID's impact after 2020, we decide to focus on pre-COVID data, narrowing our data to span January 2017-December 2019.
 
 # Step 2: Pre-COVID Delays
+
+We again do a general EDA on pre-COVID data.
