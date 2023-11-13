@@ -64,28 +64,7 @@ sum_delays= aggregate(.~date, sub_delays,sum)
 head(sum_delays)
 ```
 
-```{r}
-#plot the trend of total number of flights that is more than 15 min late 
-#look rough the same as plotting arr_delay, so for now on the doc, we use arr_delay (why this over other?)
-tsplot(sum_delays$date, sum_delays$arr_del15)
-```
-
-
-SLR 
-```{R}
-#plot, total delay in mins 
-tsplot(sum_delays$date, sum_delays$arr_delay)
-
-#basic regression model
-lm = lm(arr_delay~date, data = sum_delays)
-summary(lm)
-
-#ACF of SLR
-acf1(sum_delays$arr_delay, max.lag = 48)
-
-```
-
-aggregated on each column's mean
+To explore another aggregation method, the data was also aggregated based on mean.
 
 ```{R}
 # finding mean of each column by date
@@ -93,18 +72,46 @@ mean_delays= aggregate(.~date, sub_delays,mean)
 head(mean_delays)
 ```
 
-SLR
+## Data exploration
+
+We played around with both of the aggregation methods and tried to get a better idea of delays as a whole. To measure delays, we looked at both the number of delays as well as how much planes were delayed.
+
+Using sum aggregation:
+
+```{r}
+#plot the total number of delayed flights over time
+tsplot(sum_delays$date, sum_delays$arr_del15)
+
+#plot the total delay in mins over time
+tsplot(sum_delays$date, sum_delays$arr_delay)
+
+#basic regression model - delay in minutes
+lm = lm(arr_delay~date, data = sum_delays)
+summary(lm)
+
+#ACF of delay in minutes
+acf1(sum_delays$arr_delay, max.lag = 48)
+```
+
+Using mean aggregation:
 
 ```{R}
-#plot
+#plot the total number of delayed flights over time
+tsplot(mean_delays$date,mean_delays$arr_del15)
+
+#plot the total delay in mins over time
 tsplot(mean_delays$date, mean_delays$arr_delay)
 
-#basic regression model
+#basic regression model - delay in minutes
 lm = lm(arr_delay~date, data = mean_delays)
 summary(lm)
 
-#ACF of SLR
+#ACF of delay in minutes
 acf1(mean_delays$arr_delay, max.lag = 48)
-
 ```
 
+As we can see from the R-squared values, the regression models don't fit the data very well, likely due to the big dip seen in the time series plots starting around 2020. It is reasonable to assume that COVID-19 has drastically impacted air travel in the U.S. 
+
+Since it is difficult to "remove" COVID's impact after 2020, we decide to focus on pre-COVID data, narrowing our data to span January 2017-December 2019.
+
+# Step 2: Pre-COVID Delays
