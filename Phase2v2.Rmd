@@ -3,8 +3,8 @@ title: "STAT 335 Project Phase 2"
 author: "Shan Sun, Faith Wong"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -23,7 +23,7 @@ library(astsa)
 
 ```{r}
 # reading in csv file to R as "delays" dataframe
-delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv")
+delays <- read.csv("/Users/Shan/Downloads/Airline_Delay_Cause.csv")
 ```
 
 ```{r}
@@ -176,7 +176,7 @@ acf(sum_delays_pre$ratio)
 
 x = as.data.frame(sum_delays_pre)
 head(x)
-plot(decompose(x$ratio))
+#plot(decompose(x$ratio))
 
 ```
 
@@ -186,8 +186,6 @@ plot(decompose(x$ratio))
 
 ## carrier
 ```{R}
-
-diff_carrier = unique(delays$carrier)
 
 carrier_unprocessed = cbind("carrier" = delays$carrier,sub_delays) 
 head(carrier_unprocessed)
@@ -202,6 +200,7 @@ head(carrier_pre,20)
 ```
 
 ```{R}
+diff_carrier = unique(carrier_pre$carrier)
 ts.plot(carrier_pre$ratio[carrier_pre$carrier=="9E"], ylim= c(0,.5), ylab ="delays")
 num = 1
 for(x in diff_carrier){
@@ -214,12 +213,68 @@ for(x in diff_carrier){
 ```{R}
 
 par(mfrow=c(3,6))
-for(x in diff_carrier){
-  ts.plot(carrier_pre$ratio[carrier_pre$carrier==x], ylab="delays", ylim= c(0,.5))
+for(x in diff_carrier){ 
+  ts.plot(carrier_pre$ratio[carrier_pre$carrier==x], ylab="delays", ylim= c(0,.5)) 
+  }
+```
+
+## regression model
+
+```{r}
+#remove ones with less data
+carrier_full = data.frame()
+for(a in diff_carrier){ 
+  x = carrier_pre$arr_flights[carrier_pre$carrier==a]
+  y = carrier_pre$ratio[carrier_pre$carrier==a]
+  if(length(x)==36){
+    carrier_full = rbind(carrier_full, carrier_pre[which(carrier_pre$carrier==a),])
+  }
 }
 
+```
+
+```{R}
+#plot ratio of delay vs time for each carrier in separate plot
+diff_carrier = unique(carrier_full$carrier)
+
+par(mfrow=c(3,6))
+for(x in diff_carrier){ 
+  ts.plot(carrier_full$ratio[carrier_full$carrier==x], ylab="delays", ylim= c(0,.4)) 
+  }
 
 ```
+
+```{r}
+#plot ratio of delay vs time for each carrier on the same plot
+ts.plot(carrier_full$ratio[carrier_full$carrier=="AA"], ylim= c(0,.4), ylab ="delays")
+num = 1
+for(x in diff_carrier){
+  lines(carrier_full$ratio[carrier_full$carrier==x], col=num, lwd = 1 )
+   num = num +1
+
+     }
+```
+
+
+```{r}
+#plot the ratio of delay as a function of number of flights for each carrier 
+par(mfrow=c(3,6))
+for(x in diff_carrier){ 
+  plot(carrier_full$arr_flights[carrier_full$carrier==x],carrier_full$carrier_ct[carrier_full$carrier==x], xlab = x, ylab = "delay ratio")
+}
+```
+
+```{R}
+#build a linear model for each carrier (carrier_ct ~ arr_flight)
+for(a in diff_carrier){ 
+  x = carrier_full$arr_flights[carrier_full$carrier==a]
+  y = carrier_full$carrier_ct[carrier_full$carrier==a]
+  cor(x,y)
+  lm.x = lm(y~x)
+  print(summary(lm.x))
+}
+```
+
 
 
 Only got through here
@@ -275,6 +330,4 @@ lines(63.44,-0.56,0.0510,col="red")
 par(mfrow=c(2,2)) 
 plot(trend)
 ```
-
-
 
