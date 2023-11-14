@@ -121,7 +121,15 @@ ts.plot(sum_delays_pre$arr_delay)
 ts.plot(mean_delays_pre$arr_delay)
 
 ```
+```{R}
+ts.plot(sum_delays_pre$carrier_ct/sum_delays_pre$arr_flights, col = "red", ylim = c(0,.10))
+lines(sum_delays_pre$weather_ct/sum_delays_pre$arr_flights, col="green")
+lines(sum_delays_pre$nas_ct/sum_delays_pre$arr_flights, col="blue")
+lines(sum_delays_pre$security_ct/sum_delays_pre$arr_flights, col="purple")
+lines(sum_delays_pre$late_aircraft_ct/sum_delays_pre$arr_flights, col="black")
 
+acf(sum_delays_pre$late_aircraft_ct/sum_delays_pre$arr_flights, 36)
+```
 
 <!-- Plot -->
 <!-- ```{R} -->
@@ -180,7 +188,17 @@ head(x)
 
 ```
 
+#look at weather
+```{R}
+sum_delays_pre["ratio"] = sum_delays_pre$weather_ct/sum_delays_pre$arr_flights
+ts.plot(sum_delays_pre$ratio)
 
+acf(sum_delays_pre$ratio, 24)
+
+x = as.data.frame(sum_delays_pre)
+head(x)
+
+```
 
 
 
@@ -217,7 +235,24 @@ for(x in diff_carrier){
   ts.plot(carrier_pre$ratio[carrier_pre$carrier==x], ylab="delays", ylim= c(0,.5)) 
   }
 ```
+```{R}
+ts.plot(carrier_pre$ratio[carrier_pre$carrier=="AA"],xlab = "9E", ylab="delays", ylim= c(0,.5)) 
+lines(carrier_pre$ratio[carrier_pre$carrier=="B6"], col = "blue")
+lines(carrier_pre$ratio[carrier_pre$carrier=="EV"], col = "red") 
+lines(carrier_pre$ratio[carrier_pre$carrier=="F9"], col = "purple")
+lines(carrier_pre$ratio[carrier_pre$carrier=="VX"], col = "orange")
+lines(carrier_pre$ratio[carrier_pre$carrier=="G4"], col = "pink") 
+```
 
+```{R} 
+ts.plot(carrier_pre$ratio[carrier_pre$carrier=="9E"],xlab = "9E", ylab="delays", ylim= c(0,.5), col="dark green", xlim = c(0,35)) 
+lines(carrier_pre$ratio[carrier_pre$carrier=="AS"], col = "blue")
+lines(carrier_pre$ratio[carrier_pre$carrier=="DL"], col = "red") 
+lines(carrier_pre$ratio[carrier_pre$carrier=="HA"], col = "purple")
+lines(carrier_pre$ratio[carrier_pre$carrier=="OO"], col = "green")
+lines(carrier_pre$ratio[carrier_pre$carrier=="WN"], col = "orange")
+lines(carrier_pre$ratio[carrier_pre$carrier=="YX"], col = "pink") 
+```
 ## regression model
 
 ```{r}
