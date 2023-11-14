@@ -167,6 +167,16 @@ abline(trend,col="red")
 #plot residual
 par(mfrow=c(2,2)) 
 plot(trend)
+
+#Check hetero and does not help
+test = lm(log(arr_delay)~date, data = sum_delays_pre)
+summary(test)
+
+tsplot(sum_delays_pre$date, log(sum_delays_pre$arr_delay))
+abline(test,col="red")
+
+par(mfrow=c(2,2)) 
+plot(test)
 ```
 
 ```{R}
