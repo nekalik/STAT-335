@@ -212,3 +212,27 @@ acf2(sum_delays_pre$ratio, 34)
 It's a little unclear what model this could be (if it's something other than white noise). A MA(30) is possible.
 
 # Step 3: Causes
+
+Now that we've gotten a better idea of delays as a whole, we want to look at the nature of delays, i.e. the causes of delays. We plot them together:
+
+```{r}
+ts.plot(sum_delays_pre$carrier_ct/sum_delays_pre$arr_flights, col = "red", ylim = c(0,.10))
+lines(sum_delays_pre$weather_ct/sum_delays_pre$arr_flights, col="green")
+lines(sum_delays_pre$nas_ct/sum_delays_pre$arr_flights, col="blue")
+lines(sum_delays_pre$security_ct/sum_delays_pre$arr_flights, col="purple")
+lines(sum_delays_pre$late_aircraft_ct/sum_delays_pre$arr_flights, col="orange")
+```
+
+We see that the causal composition of the total number of flight delays is pretty consistent over time (every month, the causes of the greatest/fewest number of delays is the same). Clearly, there aren't a lot of delays due to weather or security breaches, but there are significantly more delays due to air carrier (no crew), the national aviation system (heavy air traffic), and previous delays (result of another flight on the same aircraft delayed).
+
+# Summary
+
+Our goal is to understand delays in a manner that allows us to identify key indicators of flight delay. We ultimately aim to come up with actionable insights for mitigating delays.
+
+Based on the results of our EDA, we can see that the amount of delays remain approximately the same over time. We decide to focus on the main causes of flight delays, especially the air carrier. For example, we wonder if there are particular carriers that have had a good track record over time, as well as what may influence carrier delays. We prefer to do this analysis only with the variables in the original dataset, but there is a possibility of using other variables.
+
+We will keep our analysis to pre-COVID data because of the reasons stated previously.
+
+Our initial research question was: **What is the relationship between the month and the number and nature of delays?**
+
+After this Phase, we believe that **YES**, this question is answerable, and we will specifically focus on the nature of delays, such as delays due to air carrier. 
