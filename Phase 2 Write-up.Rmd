@@ -38,7 +38,6 @@ The data had one column for the year and one column for the month, so we created
 
 ```{R}
 delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
-head(delays)
 ```
 
 # Step 1: Overall Delays
@@ -53,7 +52,6 @@ To do this, we first eliminate categorical variables such as carrier and airport
 
 ```{R}
 sub_delays = delays[-(3:6)]
-head(sub_delays)
 ```
 
 Next, we aggregated the data based on each column's sum.
@@ -61,7 +59,6 @@ Next, we aggregated the data based on each column's sum.
 ```{R}
 # finding sum of each column by date
 sum_delays= aggregate(.~date, sub_delays,sum)
-head(sum_delays)
 ```
 
 ## Data exploration
@@ -77,6 +74,16 @@ tsplot(sum_delays$date, sum_delays$arr_delay)
 ```
 
 The two time series plots look approximately the same visually, which makes sense because the total delay in minutes is dependent on how many delays there are. Thus, we can analyze either measure to understand flight delays over time.
+
+In both of the plots, there looks to be a lot of variation - what does the data look like once it's smoothed?
+
+```{r}
+tsplot(sum_delays$arr_delay, lwd=2)
+lines(ksmooth(time(sum_delays$arr_delay), sum_delays$arr_delay, "normal", bandwidth=3.5), col="green") # kernel
+lines(lowess(sum_delays$arr_delay, f=.1), col="red") # LOWESS
+```
+
+With the parameters we chose, we see that the green line, the kernel smoother, tends to display the extreme data points more. LOWESS doesn't seem to "react" as much, so it might be a better option when wanting to see a the overall trend.
 
 We also check to see if we can apply a classical structural model to the data.
 
@@ -184,3 +191,24 @@ acf1(diff(sum_delays_pre$arr_delay),30)
 With the trend removed, the variation is relatively random and indicative of white noise. Most importantly, there seems to be seasonality corresponding to at least the year (12 months) and possibly even some for approx. every half year.
 
 Detrending seems to highlight the annual cycle, while differencing shows some possible smaller cycles. Information can be gained by both of these methods, but the conclusion from detrending seems to be the most obvious.
+
+## Standardizing delays
+
+We also wonder what would happen if we represent delays as a ratio: number of delays to number of flights. This is useful if we're wondering about the deviation in delays over time, where we're taking into account the total number of flights (more flights usually means more delays).
+
+```{R}
+sum_delays_pre["ratio"] = sum_delays_pre$arr_del15/sum_delays_pre$arr_flights
+ts.plot(sum_delays_pre$ratio)
+
+acf(sum_delays_pre$ratio)
+```
+
+From the ACF, this data looks stationary. Thus, we can try using the PACF to see if we can fit an ARMA model.
+
+```{r}
+acf2(sum_delays_pre$ratio, 34)
+```
+
+It's a little unclear what model this could be (if it's something other than white noise). A MA(30) is possible.
+
+# Step 3: Causes
