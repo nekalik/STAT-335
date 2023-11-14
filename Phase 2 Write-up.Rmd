@@ -98,3 +98,83 @@ Since it is difficult to "remove" COVID's impact after 2020, we decide to focus 
 # Step 2: Pre-COVID Delays
 
 We again do a general EDA on pre-COVID data.
+
+## Subsetting dataset
+
+```{R}
+# isolating data to pre-Covid only (January 2017-December 2019)
+sum_delays_pre = sum_delays[sum_delays$date<'2020-01-01', ]
+```
+
+## Exploring data
+
+We first view our "new" time series.
+
+```{r}
+#plot the total delay in mins over time
+ts.plot(sum_delays_pre$arr_delay)
+```
+
+We see a possible slight upward trend... let's check that out.
+
+```{R}
+#fitting SLR model
+trend = lm(arr_delay~date, data = sum_delays_pre)
+summary(trend)
+
+#plot data and trend
+tsplot(sum_delays_pre$date, sum_delays_pre$arr_delay)
+abline(trend,col="red")
+
+#plot residual
+par(mfrow=c(2,2)) 
+plot(trend)
+```
+
+The p-values for the model and coefficients are significant - a relationship exists between time and the total delay time (delays increase over time). 
+
+Looking at the residuals, we see that our pre-COVID data approximately meets the regression assumptions. Although the Residuals vs Fitted line isn't perfectly straight, it does center around 0, and the residuals are pretty randomly scattered. 
+
+We wonder if the data is heteroscedastic:
+
+```{R}
+#taking log of data to address possible non-constant variance
+test = lm(log(arr_delay)~date, data = sum_delays_pre)
+summary(test)
+
+tsplot(sum_delays_pre$date, log(sum_delays_pre$arr_delay))
+abline(test,col="red")
+
+par(mfrow=c(2,2)) 
+plot(test)
+```
+
+Doing a log transformation does not help with modeling the data, so non-constant variance isn't an issue.
+
+Let's investigate the data some more using lagplots.
+
+```{R}
+# lagplot for number of delays, for 12 months
+lag1.plot(sum_delays_pre$arr_del15,12)
+```
+Lag=1 has the strongest correlation, meaning that the current data is most strongly related to the data 1 month before. The correlation is 0.57, meaning the current month's delays is somewhat dependent on the previous month's. 
+
+Based on our analyses on the pre-COVID data so far, it seems like overall delays may be some sort of autoregressive or random walk model.
+
+Let's return to the linear model and see what happens when we remove the trend (as we see that there's large variation around the trend line - maybe something else is going on).
+
+```{R}
+#detrending
+tsplot(resid(trend))
+acf1(resid(trend),30)
+```
+
+```{R}
+#differencing
+tsplot(diff(sum_delays_pre$arr_delay))
+acf1(diff(sum_delays_pre$arr_delay),30)
+```
+
+With the trend removed, the variation is relatively random and indicative of white noise. Most importantly, there seems to be seasonality corresponding to at least the year (12 months) and possibly even some for approx. every half year.
+
+Detrending seems to highlight the annual cycle, while differencing shows some possible smaller cycles. Information can be gained by both of these methods, but the conclusion from detrending seems to be the most obvious.
