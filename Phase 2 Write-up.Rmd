@@ -78,12 +78,18 @@ tsplot(sum_delays$date, sum_delays$arr_delay)
 
 The two time series plots look approximately the same visually, which makes sense because the total delay in minutes is dependent on how many delays there are. Thus, we can analyze either measure to understand flight delays over time.
 
-```{r}
-#ACF of delay in minutes
-acf1(sum_delays$arr_delay, max.lag = 48)
+We also check to see if we can apply a classical structural model to the data.
+
+This code was used:
+
+```{r, eval=FALSE}
+x = window(sum_delays$arr_del15)
+plot(stl(x, s.window="per"))
 ```
 
-The ACF isn't strongly indicative of a certain time series model... perhaps the dip from 2020-2021 is impacting it. We will elaborate below.
+However, R gave an error saying "series is not periodic or has less than two periods" - we cannot use this model.
+
+Let's try fitting a simple linear regression model.
 
 ```{r}
 #basic regression model - delay in minutes
