@@ -26,9 +26,9 @@ delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/m
 
 To restate from the Phase 1 submission:
 
-- Data description: Flight delays from January 2017 - July 2022
+-   Data description: Flight delays from January 2017 - July 2022
 
-- Research question: What is the relationship between the month and the number and nature of delays?
+-   Research question: What is the relationship between the month and the number and nature of delays?
 
 # Data Cleaning/Organization
 
@@ -42,11 +42,11 @@ delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
 
 # Step 1: Overall Delays
 
-We began our exploratory data analysis by looking at overall delays over the dataset's entire time frame. 
+We began our exploratory data analysis by looking at overall delays over the dataset's entire time frame.
 
 ## Aggregation
 
-Since each date had multiple entries, we needed to aggregate the data so there would be only one row of values for each month. 
+Since each date had multiple entries, we needed to aggregate the data so there would be only one row of values for each month.
 
 To do this, we first eliminate categorical variables such as carrier and airport (hard to perform aggregation on these).
 
@@ -63,7 +63,7 @@ sum_delays= aggregate(.~date, sub_delays,sum)
 
 ## Data exploration
 
-We played around with the aggregated data and tried to get a better idea of delays as a whole. To measure delays, we looked at both the number of delays as well as how much planes were delayed.
+We played around with the aggregated data and tried to get a better idea of delays as a whole. To measure delays, we looked at both the number of delays as well as how much planes were delayed in minutes.
 
 ```{r}
 #plot the total number of delayed flights over time
@@ -104,7 +104,7 @@ lm = lm(arr_delay~date, data = sum_delays)
 summary(lm)
 ```
 
-As we can see from the R-squared value, the regression model doesn't fit the data very well, likely due to the big dip seen in the time series plots starting around 2020. It is reasonable to assume that COVID-19 has drastically impacted air travel in the U.S. 
+As we can see from the R-squared value, the regression model doesn't fit the data very well, likely due to the big dip seen in the time series plots starting around 2020. It is reasonable to assume that COVID-19 has drastically impacted air travel in the U.S.
 
 Since it is difficult to "remove" COVID's impact after 2020, we decide to focus on pre-COVID data, narrowing our data to span January 2017-December 2019.
 
@@ -144,9 +144,9 @@ par(mfrow=c(2,2))
 plot(trend)
 ```
 
-The p-values for the model and coefficients are significant - a relationship exists between time and the total delay time (delays increase over time). 
+The p-values for the model and coefficients are significant - a relationship exists between time and the total delay time (delays increase over time).
 
-Looking at the residuals, we see that our pre-COVID data approximately meets the regression assumptions. Although the Residuals vs Fitted line isn't perfectly straight, it does center around 0, and the residuals are pretty randomly scattered. 
+Looking at the residuals, we see that our pre-COVID data approximately meets the regression assumptions. Although the Residuals vs Fitted line isn't perfectly straight, it does center around 0, and the residuals are pretty randomly scattered.
 
 We wonder if the data is heteroscedastic:
 
@@ -170,9 +170,14 @@ Let's investigate the data some more using lagplots.
 # lagplot for number of delays, for 12 months
 lag1.plot(sum_delays_pre$arr_del15,12)
 ```
-Lag=1 has the strongest correlation, meaning that the current data is most strongly related to the data 1 month before. The correlation is 0.57, meaning the current month's delays is somewhat dependent on the previous month's. 
 
-Based on our analyses on the pre-COVID data so far, it seems like overall delays may be some sort of autoregressive or random walk model.
+Lag=1 has the strongest correlation, meaning that the current data is most strongly related to the data 1 month before. The correlation is 0.57, meaning the current month's delays is somewhat dependent on the previous month's.
+
+```{r}
+acf(sum_delays_pre$arr_delay)
+```
+
+The ACF of the first 2 lags are outside of the dotted range, so the dataset is likely not a white noise model. Based on our analyses on the pre-COVID data so far, it seems like overall delays may be some linear combination of autoregressive model and white noise or random walk.
 
 Let's return to the linear model and see what happens when we remove the trend (as we see that there's large variation around the trend line - maybe something else is going on).
 
@@ -235,4 +240,49 @@ We will keep our analysis to pre-COVID data because of the reasons stated previo
 
 Our initial research question was: **What is the relationship between the month and the number and nature of delays?**
 
-After this Phase, we believe that **YES**, this question is answerable, and we will specifically focus on the nature of delays, such as delays due to air carrier. 
+After this Phase, we believe that **YES**, this question is answerable, and we will specifically focus on the nature of delays, such as delays due to air carrier.
+
+
+\textbf{Data Dictionary}
+
+
+\begin{table}[]
+\begin{tabular}{|l|l|}
+\hline
+delays           & flight data read from csv file + date column                                              \\ \hline
+sub\_delays      & flight data with categorical data removed (ex. carrier name, airport name)                \\ \hline
+sum\_delays      & aggregate all flight data that is in the same year and month and sum all the delay flight \\ \hline
+sum\_delays\_pre & aggregated flight information up to pre-covid time (December of 2019)                     \\ \hline
+\end{tabular}
+\end{table}
+
+
+\begin{table}[]
+\begin{tabular}{|ll|}
+\hline
+\multicolumn{2}{|l|}{Variable Meaning (across all dataframe)}                                                         \\ \hline
+\multicolumn{1}{|l|}{year}                 & flight date in year                                                      \\ \hline
+\multicolumn{1}{|l|}{month}                & flight date in month                                                     \\ \hline
+\multicolumn{1}{|l|}{date}                 & flight date in yy-mm-01 format                                           \\ \hline
+\multicolumn{1}{|l|}{carrier}              & Carrier code (ei. 9E)                                                    \\ \hline
+\multicolumn{1}{|l|}{carrier\_name}        & Carrier name                                                             \\ \hline
+\multicolumn{1}{|l|}{airport}              & Airport code                                                             \\ \hline
+\multicolumn{1}{|l|}{Airport\_name}        & Airport name                                                             \\ \hline
+\multicolumn{1}{|l|}{arr\_flights}         & Number of flights arriving at airport                                    \\ \hline
+\multicolumn{1}{|l|}{arr\_del15}           & Number of flights more than 15 min late                                  \\ \hline
+\multicolumn{1}{|l|}{arr\_delay}           & Total min delayed                                                        \\ \hline
+\multicolumn{1}{|l|}{arr\_cancelled}       & Number of flight canceled                                                \\ \hline
+\multicolumn{1}{|l|}{arr\_diverted}        & Number of flights diverted                                               \\ \hline
+\multicolumn{1}{|l|}{carrier\_ct}          & Number of flight delayed due to air carrier                              \\ \hline
+\multicolumn{1}{|l|}{Weather\_ct}          & Number of flight delay due to weather                                    \\ \hline
+\multicolumn{1}{|l|}{nas\_ct}              & Number of flight delay due to national aviation system                   \\ \hline
+\multicolumn{1}{|l|}{security\_ct}         & Number of flight cancel due to security breach                           \\ \hline
+\multicolumn{1}{|l|}{late\_aircraft\_ct}   & Number of flight delays due to another flight delay                      \\ \hline
+\multicolumn{1}{|l|}{Carrier\_delay}       & Total min delay due to air carrier                                       \\ \hline
+\multicolumn{1}{|l|}{Weather\_delay}       & Total min delay due to weather                                           \\ \hline
+\multicolumn{1}{|l|}{nas\_delay}           & Total min delay due to NAS                                               \\ \hline
+\multicolumn{1}{|l|}{Security\_delay}      & Total min delay due to security issue                                    \\ \hline
+\multicolumn{1}{|l|}{late\_aircaft\_delay} & Total min delay due to another flight delay                              \\ \hline
+\multicolumn{1}{|l|}{ratio}                & Ratio between total number of delayed flight and total number of flights \\ \hline
+\end{tabular}
+\end{table}
