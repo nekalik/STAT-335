@@ -30,11 +30,106 @@ Research Question: **What is the relationship between the both and the number of
 
 <!-- Be sure to carefully select the plots and graphics that best support your analysis and conclusion. -->
 
+```{r}
+library(astsa)
+delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv")
+delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
+sub_delays = delays[-(3:6)]
+sum_delays= aggregate(.~date, sub_delays,sum)
+sum_delays_pre = sum_delays[sum_delays$date<'2020-01-01', ]
+```
+
+
+```{r}
+#a general name for variable modeling
+x = sum_delays_pre$arr_del15
+
+tsplot(x)
+plot(x)
+lm.x = lm(x~sum_delays_pre$date)
+summary(lm.x)
+par(mfrow = c(2, 2))
+plot(lm.x)
+```
+
+The time series plot of x shows a linear trend. After performing a linear regression on the model on time, there seems to be some nonconstant variance in the residual plot, so to help with model selection, we also built some models with log(x)
+
+
+## Model Building With X
+```{R}
+tsplot(x)
+
+#acf within the range after the first few lag
+acf(x,30)
+acf2(x,30)
+```
+AIC cut off after lag 2, and PACF cut off after lag 1
+
+```{R}
+sarima(x, p=1, d=0, q =0)
+sarima(x, p=0, d=0, q=2)
+```
+For both models, the variable are significant, and the residual looks like a white noise and pass the Ljung-Box test
+
+Also tried building model for by detrending it
+
+```{R}
+#detrend
+tsplot(diff(x))
+#more stationary looking
+acf(diff(x),30)
+#parameter selection
+acf2(diff(x),30)
+sarima(x, p=0, d=1, q=2,)
+```
+Potentially a ARIMA(0,1,2) model. The AIC for the past 3 models are very close. 
+
+
+## Model Building with log(X)
+```{R}
+par(mfrow = c(2, 1))
+tsplot(log(x))
+tsplot(diff(log(x)))
+```
+
+```{r}
+acf2(diff(log(x)), 20)
+```
+The ACF of the model seems to be touching the dotted line at lag of 1, so we tried both p=0, and p=1.
+The PACF of the model seems to cut off after lag of 1. 
+
+```{r}
+sarima(log(x), p=1, d=1, q =0, no.constant = TRUE)
+sarima(log(x), p=1, d=1, q =1, no.constant = TRUE)
+```
+The estimate of ma1 is not significant and the AIC of ARIMA(1,1,0) is little bit lower than AIC of ARIMA(1,1,1), so ARIMA(1,1,0) is the better out of the two. 
+
+## Model Selection with Seasonality
+```{r}
+tsplot(diff(diff(x),12))
+acf2(diff(diff(x),12), 20)
+
+
+#sarima(log(x), p=0, d=1, q=0, P=0, D=1, Q=0, S=12)
+```
+The acf and pacf goes to 0 after lag of 0, so it there doesn't seems to be seaonality within the data
+
 ## Conclusion
 
 <!-- Be sure to provide a clearly articulated answer to your research question that is well-supported by your analysis. -->
 
+```{r}
+sarima(log(x), p=1, d=1, q =1, no.constant = TRUE)
 
+par(mfrow=c(2,1))
+
+#still need to work on this!
+sarima.for(log(x), p=1, d=1, q =1, no.constant = TRUE, n.ahead=12)
+
+tsplot(log(sum_delays$arr_del15), xlim=c(0,50))
+```
+
+Comparing the prediction of delays if covid didn't hit.
 ## References
 
 <!-- I'm not picky about reference style but references should be accurate and complete. If you want a style guide, use this one: [IEEE Style Guide](https://ieee-dataport.org/sites/default/files/analysis/27/IEEE%20Citation%20Guidelines.pdf) -->
