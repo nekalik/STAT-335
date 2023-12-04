@@ -1,0 +1,41 @@
+---
+title: "Report Title"
+author: "Shan Sun, Faith Wong"
+date: "STAT 335, Fall 2023"
+output: pdf_document
+fontsize: 12pt
+header-includes:
+  - \usepackage[margin=1in]{geometry}
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+<!-- An introduction to the data and the problem would be a very good way to start. -->
+
+
+
+## The Research Question
+
+<!-- Clearly state your SINGLE RESEARCH QUESTION -->
+Research Question: **What is the relationship between the both and the number of delays**
+
+## Analysis
+
+<!-- Your analysis goes here.  -->
+
+<!-- Be sure to carefully select the plots and graphics that best support your analysis and conclusion. -->
+
+## Conclusion
+
+<!-- Be sure to provide a clearly articulated answer to your research question that is well-supported by your analysis. -->
+
+
+## References
+
+<!-- I'm not picky about reference style but references should be accurate and complete. If you want a style guide, use this one: [IEEE Style Guide](https://ieee-dataport.org/sites/default/files/analysis/27/IEEE%20Citation%20Guidelines.pdf) -->
+
