@@ -364,3 +364,98 @@ par(mfrow=c(2,2))
 plot(trend)
 ```
 
+
+<!-- ## Model Building With X -->
+
+<!-- ```{R} -->
+
+<!-- tsplot(x) -->
+
+<!-- #acf within the range after the first few lag -->
+
+<!-- acf(x,30) -->
+
+<!-- acf2(x,30) -->
+
+<!-- ``` -->
+
+<!-- AIC cut off after lag 2, and PACF cut off after lag 1 -->
+
+<!-- ```{R} -->
+
+<!-- sarima(x, p=1, d=0, q =0) -->
+
+<!-- sarima(x, p=0, d=0, q=2) -->
+
+<!-- ``` -->
+
+<!-- For both models, the variable are significant, and the residual looks like a white noise and pass the Ljung-Box test -->
+
+<!-- Also tried building model for by detrending it -->
+
+<!-- ```{R} -->
+
+<!-- #detrend -->
+
+<!-- tsplot(diff(x)) -->
+
+<!-- #more stationary looking -->
+
+<!-- acf(diff(x),30) -->
+
+<!-- #parameter selection -->
+
+<!-- acf2(diff(x),30) -->
+
+<!-- sarima(x, p=0, d=1, q=2) -->
+
+<!-- ``` -->
+
+<!-- Potentially a ARIMA(0,1,2) model. The AIC for the past 3 models are very close.  -->
+
+<!-- ## Model Building with log(X) -->
+
+<!-- ```{R} -->
+
+<!-- par(mfrow = c(2, 1)) -->
+
+<!-- tsplot(log(x)) -->
+
+<!-- tsplot(diff(log(x))) -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+
+<!-- acf2(diff(log(x)), 20) -->
+
+<!-- ``` -->
+
+<!-- The ACF of the model seems to be touching the dotted line at lag of 1, so we tried both p=0, and p=1. -->
+
+<!-- The PACF of the model seems to cut off after lag of 1.  -->
+
+<!-- ```{r} -->
+
+<!-- sarima(log(x), p=1, d=1, q =0, no.constant = TRUE) -->
+
+<!-- sarima(log(x), p=1, d=1, q =1, no.constant = TRUE) -->
+
+<!-- ``` -->
+
+<!-- The estimate of ma1 is not significant and the AIC of ARIMA(1,1,0) is little bit lower than AIC of ARIMA(1,1,1), so ARIMA(1,1,0) is the better out of the two.  -->
+
+<!-- ## Model Selection with Seasonality -->
+
+<!-- ```{r} -->
+
+<!-- tsplot(diff(diff(x),12)) -->
+
+<!-- acf2(diff(diff(x),12), 20) -->
+
+<!-- #sarima(log(x), p=0, d=1, q=0, P=0, D=1, Q=0, S=12) -->
+
+<!-- ``` -->
+
+<!-- The acf and pacf goes to 0 after lag of 0, so it there doesn't seems to be seaonality within the data -->
+
