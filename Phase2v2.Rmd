@@ -131,14 +131,14 @@ lines(sum_delays_pre$late_aircraft_ct/sum_delays_pre$arr_flights, col="black")
 acf(sum_delays_pre$late_aircraft_ct/sum_delays_pre$arr_flights, 36)
 ```
 
-<!-- Plot -->
-<!-- ```{R} -->
-<!-- #different trends here, wonder why  -->
-<!-- par(mfrow = c(1,2)) -->
-<!-- ts.plot(sum_delays_pre$arr_del15) -->
-<!-- ts.plot(mean_delays_pre$arr_del15) -->
+ Plot 
+ ```{R} 
+ #different trends here, wonder why  
+ par(mfrow = c(1,2)) 
+ ts.plot(sum_delays_pre$arr_del15) 
+ ts.plot(mean_delays_pre$arr_del15) 
 
-<!-- ``` -->
+ ``` 
 
 SLR 
 ```{R}
@@ -365,97 +365,122 @@ plot(trend)
 ```
 
 
-<!-- ## Model Building With X -->
 
-<!-- ```{R} -->
 
-<!-- tsplot(x) -->
 
-<!-- #acf within the range after the first few lag -->
 
-<!-- acf(x,30) -->
+ ## Model Building With X 
 
-<!-- acf2(x,30) -->
+```{R} 
 
-<!-- ``` -->
+ tsplot(x) 
 
-<!-- AIC cut off after lag 2, and PACF cut off after lag 1 -->
+ #acf within the range after the first few lag 
 
-<!-- ```{R} -->
+ acf(x,30) 
 
-<!-- sarima(x, p=1, d=0, q =0) -->
+ acf2(x,30) 
 
-<!-- sarima(x, p=0, d=0, q=2) -->
+``` 
 
-<!-- ``` -->
+ AIC cut off after lag 2, and PACF cut off after lag 1 
 
-<!-- For both models, the variable are significant, and the residual looks like a white noise and pass the Ljung-Box test -->
+```{R} 
 
-<!-- Also tried building model for by detrending it -->
+ sarima(x, p=1, d=0, q =0) 
 
-<!-- ```{R} -->
+ sarima(x, p=0, d=0, q=2) 
 
-<!-- #detrend -->
+``` 
 
-<!-- tsplot(diff(x)) -->
+ For both models, the variable are significant, and the residual looks like a white noise and pass the Ljung-Box test 
 
-<!-- #more stationary looking -->
+ Also tried building model for by detrending it 
 
-<!-- acf(diff(x),30) -->
+```{R} 
 
-<!-- #parameter selection -->
+ #detrend 
 
-<!-- acf2(diff(x),30) -->
+ tsplot(diff(x)) 
 
-<!-- sarima(x, p=0, d=1, q=2) -->
+ #more stationary looking 
 
-<!-- ``` -->
+ acf(diff(x),30) 
 
-<!-- Potentially a ARIMA(0,1,2) model. The AIC for the past 3 models are very close.  -->
+ #parameter selection 
 
-<!-- ## Model Building with log(X) -->
+ acf2(diff(x),30) 
 
-<!-- ```{R} -->
+ sarima(x, p=0, d=1, q=2) 
 
-<!-- par(mfrow = c(2, 1)) -->
+``` 
 
-<!-- tsplot(log(x)) -->
+ Potentially a ARIMA(0,1,2) model. The AIC for the past 3 models are very close.  
 
-<!-- tsplot(diff(log(x))) -->
+ ## Model Building with log(X) 
 
-<!-- ``` -->
+```{R} 
 
-<!-- ```{r} -->
+ par(mfrow = c(2, 1)) 
 
-<!-- acf2(diff(log(x)), 20) -->
+ tsplot(log(x)) 
 
-<!-- ``` -->
+ tsplot(diff(log(x))) 
 
-<!-- The ACF of the model seems to be touching the dotted line at lag of 1, so we tried both p=0, and p=1. -->
+``` 
 
-<!-- The PACF of the model seems to cut off after lag of 1.  -->
+```{r} 
 
-<!-- ```{r} -->
+ acf2(diff(log(x)), 20) 
 
-<!-- sarima(log(x), p=1, d=1, q =0, no.constant = TRUE) -->
+``` 
 
-<!-- sarima(log(x), p=1, d=1, q =1, no.constant = TRUE) -->
+ The ACF of the model seems to be touching the dotted line at lag of 1, so we tried both p=0, and p=1. 
 
-<!-- ``` -->
+ The PACF of the model seems to cut off after lag of 1.  
 
-<!-- The estimate of ma1 is not significant and the AIC of ARIMA(1,1,0) is little bit lower than AIC of ARIMA(1,1,1), so ARIMA(1,1,0) is the better out of the two.  -->
+```{r} 
 
-<!-- ## Model Selection with Seasonality -->
+ sarima(log(x), p=1, d=1, q =0, no.constant = TRUE) 
 
-<!-- ```{r} -->
+``` 
 
-<!-- tsplot(diff(diff(x),12)) -->
+```{r}
+sarima(log(x), p=1, d=1, q =1, no.constant = TRUE)
+```
 
-<!-- acf2(diff(diff(x),12), 20) -->
 
-<!-- #sarima(log(x), p=0, d=1, q=0, P=0, D=1, Q=0, S=12) -->
+ The estimate of ma1 is not significant and the AIC of ARIMA(1,1,0) is little bit lower than AIC of ARIMA(1,1,1), so ARIMA(1,1,0) is the better out of the two.  
 
-<!-- ``` -->
+ ## Model Selection with Seasonality 
 
-<!-- The acf and pacf goes to 0 after lag of 0, so it there doesn't seems to be seaonality within the data -->
+```{r} 
 
+ tsplot(diff(diff(x),12)) 
+
+ acf2(diff(diff(x),12), 20) 
+
+ #sarima(log(x), p=0, d=1, q=0, P=0, D=1, Q=0, S=12) 
+
+``` 
+
+ The acf and pacf goes to 0 after lag of 0, so it there doesn't seems to be seaonality within the data 
+
+
+
+
+
+### Delays & number of flights; ratio
+
+```{r}
+library(corrplot)
+sum_delays_pre["ratio"] = sum_delays_pre$arr_del15/sum_delays_pre$arr_flights
+
+plot(sum_delays$arr_flights, sum_delays$arr_del15)
+
+lm(arr_del15~arr_flights, data = sum_delays)
+cor(sum_delays$arr_flights, sum_delays$arr_del15)
+
+
+
+```

@@ -18,9 +18,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The dataset describes U.S. flight delays from January 2017 - July 2022. Some variables included are the year and month of data collection, airline carrier, airport, the number of flights delayed due to a specific reason (air carrier, weather, National Aviation System, security issue, previous flight delayed), and the total time (minutes) of delay due to a specific reason.
 
+We want to 
+
 ## The Research Question
 
 <!-- Clearly state your SINGLE RESEARCH QUESTION -->
+
+We 
 
 Research Question: **What is the relationship between the both and the number of delays**
 
@@ -32,7 +36,7 @@ Research Question: **What is the relationship between the both and the number of
 
 ### Data Organization
 
-We began by loading the data and manipulating it into a format we can use. We created a column for dates, removed categorical variables, and aggregated the data for each month.
+Before we did any analysis, we began by loading the data and manipulating it into a format we can use. We created a column for dates, removed categorical variables, and aggregated the data for each month.
 
 ```{r, results='hide'}
 # setup
@@ -97,9 +101,12 @@ We will make use of these insights as we attempt to fit an ARIMA/SARIMA model.
 
 ### Model Building
 
-We use the regression results to guide us in model fitting. Since there's a linear trend, we will difference the data. In addition, we will attempt building some models with log(x) due to possible heteroscedasticity. From the time series plot of number of delays vs time, there seems to be seasonality in the data, however we tried to do a $ARIMA_{x}(1,1,1) \times (0,1,1)_{12}$ model, the code failed. The error could be cause by the lack of data, since after removing the data after COVID, restricts the data set to 36 points (2017-2020).
+We used our previous discoveries to guide us in model fitting. Since there's a linear trend, we differenced the data. In addition, we attempted to build some models with log(x) due to possible heteroscedasticity. From the time series plot of number of delays vs time, there seems to be seasonality in the data, so we tried fitting a SARIMA model. 
 
-After examining the pacf and acf of x and log(x), we came up with the following models where the standarized residuals are white noise like, the acf are within the bound, the Q-Q plot seems to be straight, and the p-value for Ljung-Box statistic are above 0.05. Since the AIC, AICc, and BIC are approximately equal, We only recorded the AIC in the table below.  
+After examining the acf and pacf of x and log(x), we came up with the following models (shown in the table) where the standarized residuals are white noise like, the acf values are within the confidence bands, the Q-Q plot seems to be straight, and the p-values for the Ljung-Box statistic are above 0.05. Since the AIC, AICc, and BIC are approximately equal for each model, we only recorded the AIC in the table. 
+
+A SARIMA model is not included because when we tried to do a $ARIMA_{x}(1,1,1) \times (0,1,1)_{12}$ model, the code failed. The error could be caused by the lack of data, since after removing the data after COVID, the data set is restricted to 36 points (2017-2020).
+
 ```{=tex}
 \begin{table}[]
 \begin{tabular}{|l|l|l|l|l|l|}
@@ -110,10 +117,23 @@ AIC & $22.62471$ & $22.597$ & $22.73819$     & $-0.1939758$          & $-0.1974$
 \end{table}
 ```
 
+$$
 
-## Conclusion
+\begin{table}[]
+\begin{tabular}{lllll}
+Model                   & Ljung-Box & AIC          &  &  \\
+$AR_x(1)$               &           & $22.62471$   &  &  \\
+$MA_x(2)$               &           & $22.597$     &  &  \\
+$ARIMA_x(0,1,2)$        &           & $22.73819$   &  &  \\
+$ARIMA_{log(x)}(1,1,0)$ &           & $-0.1939758$ &  &  \\
+$ARIMA_{log(x)}(1,1,1)$ & example   & $-0.1974$    &  & 
+\end{tabular}
+\end{table}
 
-<!-- Be sure to provide a clearly articulated answer to your research question that is well-supported by your analysis. -->
+$$
+
+### Model Selection
+
 After carefully examining the residuals and the AIC, we believe $ARIMA_{log(x)}(1,1,1)$ is the best model for this data set since it has the smallest AIC. We performed a forecast with this data. 
 
 ```{r, results='hide'}
@@ -121,6 +141,8 @@ sarima(log(x), p=1, d=1, q =1, no.constant = TRUE)
 sar.log = sarima.for(log(x), p=1, d=1, q =1, no.constant = TRUE, n.ahead=24)
 sar.log
 ```
+
+### COVID
 
 Since the trend in the data set was interrupted due to COVID, we like to forecast how would the data looks like if COVID didn't hit, and we would like to use prediction to see when the flights recover from COVID (the time where post-COVID data catch back to the forecast trend).
 
@@ -131,6 +153,25 @@ lines(prediction, col=4, lty=2, lwd=1.5 )
 #legend()
 ```
 By plotting the forecast and the actual data on the same plot, we can see the actual data catch up to prediction around time 53 (May of 2021). We can see from the graph, the overall flow of the data seems to be smooth by replacing the cave due to COVID with the forecast. Even though, forecast does not shows a lot of fluctuation after the 10 prediction, it still give a general idea of where the delay would land, it COVID didn't hit. 
+
+
+This makes sense - COVID impacted number of flights.
+
+```{r}
+library(corrplot)
+cor(sum_delays$arr_flights, sum_delays$arr_del15)
+
+lm.ratio = lm(arr_del15~arr_flights, data = sum_delays)
+
+plot(sum_delays$arr_flights, sum_delays$arr_del15)
+abline(lm.ratio)
+```
+
+
+## Conclusion
+
+<!-- Be sure to provide a clearly articulated answer to your research question that is well-supported by your analysis. -->
+
 
 ## References
 
@@ -144,15 +185,3 @@ Jawad Khattak, 2022. *"Flight Delay from January 2017 - July 2022."* Kaggle.com,
 
 
 
-```{r}
-library(corrplot)
-sum_delays_pre["ratio"] = sum_delays_pre$arr_del15/sum_delays_pre$arr_flights
-
-plot(sum_delays$arr_flights, sum_delays$arr_del15)
-
-lm(arr_del15~arr_flights, data = sum_delays)
-cor(sum_delays$arr_flights, sum_delays$arr_del15)
-
-
-
-```
