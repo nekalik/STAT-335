@@ -14,25 +14,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-<!-- An introduction to the data and the problem would be a very good way to start. -->
+The dataset was found compiled on Kaggle (Jawad Khattak, 2022), originally from the Department of Transportation (BTS, 2022).
 
-The dataset describes U.S. flight delays from January 2017 - July 2022. Some variables included are the year and month of data collection, airline carrier, airport, the number of flights delayed due to a specific reason (air carrier, weather, National Aviation System, security issue, previous flight delayed), and the total time (minutes) of delay due to a specific reason.
+The data describes U.S. flight delays from January 2017 - July 2022. Some variables included are the year and month of data collection, airline carrier, airport, the number of flights delayed due to a specific reason (air carrier, weather, National Aviation System, security issue, previous flight delayed), and the total time (minutes) of delay due to a specific reason.
 
-We want to
+Since the dataset includes 2020, we wonder if the effects of COVID are seen with flight delays, and if so, how it caused the delays to change over time.
 
 ## The Research Question
 
-<!-- Clearly state your SINGLE RESEARCH QUESTION -->
-
-We
-
-Research Question: **What is the relationship between the both and the number of delays**
+**What is the impact of COVID-19 on flight delays?**
 
 ## Analysis
-
-<!-- Your analysis goes here.  -->
-
-<!-- Be sure to carefully select the plots and graphics that best support your analysis and conclusion. -->
 
 ### Data Organization
 
@@ -55,19 +47,21 @@ sum_delays= aggregate(.~date, sub_delays,sum)
 
 ### Data Exploration
 
+First, we view the number of delays over the entire span of the dataset.
+
 ```{r}
 # total number of delays
 tsplot(x=sum_delays$date,y=sum_delays$arr_del15)
 ```
 
-COVID has a large impact on flights, so a data frame was created exclusively for pre-COVID data.
+It does appear that COVID had an impact on delays around 2020. We created a data frame exclusively for pre-COVID data to examine the behavior of delays before January 2020, when COVID spread to the US (CDC, 2023).
 
 ```{r}
 # pre-COVID data
 sum_delays_pre = sum_delays[sum_delays$date<'2020-01-01', ]
 ```
 
-For now, we focused on the number of delayed flights ("arr_del15") before COVID. To begin, the delays over time was plotted.
+For now, we focus on the number of delayed flights ("arr_del15") before COVID. To begin, the delays over time was plotted, without the distraction of the abnormal data after 2020.
 
 ```{r}
 # variable to focus on
@@ -79,7 +73,7 @@ xx = sum_delays_pre$date
 tsplot(x=xx, y=x)
 ```
 
-Before 2020, it appears that there's a linear trend, so we fit a linear regression model.
+Before 2020, it appears that there's a linear trend, so we fit a linear regression model to investigate further.
 
 ### Linear Regression
 
@@ -95,18 +89,17 @@ par(mfrow = c(2, 2))
 plot(lm.x)
 ```
 
-Clearly, the linear trend we observed previously is present and not due to randomness, because the regression model & parameter estimate are significant, and the residuals look relatively good. Also, there may be some nonconstant variance in the residual plot.
+The results tell us that the linear trend we observed previously is present and not due to randomness, because the regression model & parameter estimate are significant, and the residuals look relatively good. Also, there may be some nonconstant variance in the residual plot.
 
-We will make use of these insights as we attempt to fit an ARIMA/SARIMA model.
+We will make use of these insights as we attempt to fit an ARIMA/SARIMA model to the number of delays before COVID.
 
 ### Model Building
 
 We used our previous discoveries to guide us in model fitting. Since there's a linear trend, we differenced the data. In addition, we attempted to build some models with log(x) due to possible heteroscedasticity. 
 
-From the time series plot of the number of delays vs time, there seems to be seasonality in the data. However, an error occurred when we tried $ARIMA_{x}(1,1,1) \times (0,1,1)_{12}$ model. The error could be caused by the lack of data. After removing the data after COVID, the data set is restricted to 36 points (2017-2020).
+From the time series plot of the number of delays vs time, there seems to be seasonality in the data. However, an error occurred when we tried $ARIMA_{x}(1,1,1) \times (0,1,1)_{12}$ model. The error could be caused by the lack of data. After removing the data after COVID, the data set is restricted to 36 points (2017-2020). In addition, when we looked at `acf2(diff(diff(x),12), 20)`, the acf and pacf values are all ~0, as further evidence of nonsignificant seasonality. 
 
-After examining the acf and pacf of x and log(x), we came up with the following models (shown in the table). For all of these models, the standardized residuals are white noise-like, ACF within the confidence bands, the Q-Q plot seems to be straight, and the p-values for the Ljung-Box statistic are above 0.05. The best white noise-like model is noted with ++. The AIC and AICc are close to each other, so we only included the AIC and BIC in the table.
-
+After examining the acf and pacf of x and log(x), we came up with potential models for our data. We compare them in the table below. For the "Residual" criteria, we want the following: the standardized residuals are white noise-like, ACF within the confidence bands, the Q-Q plot seems to be straight, and the p-values for the Ljung-Box statistic are above 0.05 (higher is better). The best white noise-like model is noted with ++. The AIC and AICc are close to each other, so we only included the AIC and BIC in the table.
 
 ```{=tex}
 \begin{table}[]
@@ -123,19 +116,27 @@ $ARIMA_{log(x)}(1,1,0)$ & $-0.1974$   & -0.1086     & significant               
 \end{tabular}
 \end{table}
 ```
+
 ### Model Selection
 
-After carefully examining the residuals and the AIC, we believe $ARIMA_{log(x)}(1,1,1)$ is the best model for this data set since it has the smallest AIC and the best white-noise like residual. We performed a forecast with this data.
+After carefully comparing the models based on the criteria listed in the table, we believe $MA_{log(x)}(2)$ is the best model for this data set (see below for its residuals). It is the best across all categories except the BIC, but there is only a difference of ~0.02 with another model's BIC, and we know that the BIC favors models with less parameters. Therefore, we proceed with this model to do forecasting.
 
 ```{r, results='hide'}
-sarima(log(x), p=0, d=0, q =2)
-sar.log = sarima.for(log(x), p=0, d=0, q =2, n.ahead=24)
+sarima(log(x), p=0, d=0, q=2)
+```
+
+### Forecasting
+
+```{r}
+sar.log = sarima.for(log(x), p=0, d=0, q=2, n.ahead=24)
 sar.log
 ```
 
+The forecast converges at around 11.5, a constant. Since we used log(x), this is equivalent to $e^{11.5} \approx 98716$ - approximately 98716 flight delays are predicted to happen each month. We previously thought there was an increasing trend over time, but with the model we chose, it seems like the number of delays aren't expected to change significantly each month. 
+
 ### COVID
 
-Since the trend in the data set was interrupted due to COVID, we like to forecast how would the data looks like if COVID didn't hit, and we would like to use prediction to see when the flights recover from COVID (the time where post-COVID data catch back to the forecast trend).
+Since we saw a large dip in the original data due to COVID, our forecast shows what the data may have looked like if COVID didn't occur. We also would like to see when the flight delays "recovered" from COVID (the time where post-COVID data catches up to the forecast trend).
 
 ```{R}
 prediction = sar.log$pred
@@ -144,9 +145,11 @@ lines(prediction, col=4, lty=2, lwd=1.5 )
 legend(0,10, legend = c("actual", "forecast"), col=c(1,4), lty = c(1,2))
 ```
 
-By plotting the forecast and the actual data on the same plot, we can see the actual data catch up to prediction around time 53 (May of 2021). We can see from the graph, the overall flow of the data seems to be smooth by replacing the cave due to COVID with the forecast. Even though, forecast does not shows a lot of fluctuation after the 10 prediction, it still give a general idea of where the delay would land, it COVID didn't hit.
+By plotting the forecast and the actual data on the same plot, we can see that the actual data catches up to prediction around May of 2021. We can see from the graph that the overall "flow" of the data seems to be smoothed out by replacing the cave due to COVID with the forecast. Although the forecast does not shows a lot of fluctuation after a few months, it still give a general idea of where the delay would land if COVID didn't hit.
 
-This makes sense - COVID impacted number of flights.
+In addition, the graph gives insight into the degree of COVID's impact on flight delays. Since the forecast approximately matches the actual data starting around May 2021, there is a recovery period of about a year and a quarter - since U.S. lockdowns began in March (CDC, 2023) - until delays get back to "normal" like they were before COVID. 
+
+We'd also like to briefly justify the large dip in flight delays starting 2020. For instance, COVID may have caused flight attendants to leave their jobs to avoid infection from the many passengers they interact with. Crew shortages might lead to flight delays. Therefore, why did the number of delays drop so dramatically? Logically, less people traveled due to the pandemic, so there were less flights, less flights that had the potential of being delayed, and thus less delays. We confirm this by examining the relationship between the number of delays and number of flights (we use the entire dataset to ensure our results are consistent):
 
 ```{r}
 library(corrplot)
@@ -158,14 +161,16 @@ plot(sum_delays$arr_flights, sum_delays$arr_del15)
 abline(lm.ratio)
 ```
 
+The correlation coefficient is strongly positive, so overall, delays increase as flights increase. This is also supported by the plot. Therefore, it makes sense for COVID to cause the number of delays to decrease due to less people flying.
+
 ## Conclusion
 
 <!-- Be sure to provide a clearly articulated answer to your research question that is well-supported by your analysis. -->
 
 ## References
 
-<!-- I'm not picky about reference style but references should be accurate and complete. If you want a style guide, use this one: [IEEE Style Guide](https://ieee-dataport.org/sites/default/files/analysis/27/IEEE%20Citation%20Guidelines.pdf) -->
+Jawad Khattak, 2022. *"Flight Delay from January 2017 - July 2022."* Kaggle.com, https://www.kaggle.com/datasets/jawadkhattak/us-flight-delay-from-january-2017-july-2022.
 
-U.S. Department of Transportation: Bureau of Transportation Statistics (BTS), 2022. *"Airline On-Time Statistics and Delay Causes."* BTS website, <https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp>.
+U.S. Centers for Disease Control and Prevention (CDC), 2023. *"CDC Museum COVID-19 Timeline."* CDC website, https://www.cdc.gov/museum/timeline/covid19.html.
 
-Jawad Khattak, 2022. *"Flight Delay from January 2017 - July 2022."* Kaggle.com, <https://www.kaggle.com/datasets/jawadkhattak/us-flight-delay-from-january-2017-july-2022>.
+U.S. Department of Transportation: Bureau of Transportation Statistics (BTS), 2022. *"Airline On-Time Statistics and Delay Causes."* BTS website, https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp.
