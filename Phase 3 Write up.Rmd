@@ -30,36 +30,74 @@ Research Question: **What is the relationship between the both and the number of
 
 <!-- Be sure to carefully select the plots and graphics that best support your analysis and conclusion. -->
 
-We began by loading the data and manipulating it into a format we can use. As described in Phase 2, we created a column for dates, removed categorical variables, and aggregated the data for each month. Also, a data frame is created for pre-COVID data, since we previously saw that COVID had a large impact on flights.
+### Data Organization
+
+We began by loading the data and manipulating it into a format we can use. We created a column for dates, removed categorical variables, and aggregated the data for each month.
 
 ```{r, results='hide'}
+# setup
 library(astsa)
 delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv")
+
+# formatting dates
 delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
+
+# removing categorical variables
 sub_delays = delays[-(3:6)]
+
+# sum to aggregate
 sum_delays= aggregate(.~date, sub_delays,sum)
+```
+
+### Data Exploration
+
+```{r}
+# total number of delays
+tsplot(x=sum_delays$date,y=sum_delays$arr_del15)
+```
+
+COVID has a large impact on flights, so a data frame was created exclusively for pre-COVID data.
+
+```{r}
+# pre-COVID data
 sum_delays_pre = sum_delays[sum_delays$date<'2020-01-01', ]
 ```
 
-For now, we focus on the number of delayed flights ("arr_del15") before COVID.
+For now, we focused on the number of delayed flights ("arr_del15") before COVID. To begin, the delays over time was plotted.
 
 ```{r}
-#a general name for variable modeling
+# variable to focus on
 x = sum_delays_pre$arr_del15
 
-tsplot(x)
+xx = sum_delays_pre$date
+
+# time series plot
+tsplot(x=xx, y=x)
+```
+
+Before 2020, it appears that there's a linear trend, so we fit a linear regression model.
+
+### Linear Regression
+
+```{r}
 lm.x = lm(x~sum_delays_pre$date)
 
-plot(x=sum_delays_pre$date, y=x)
+plot(x=xx, y=x)
 abline(lm.x)
 
 summary(lm.x)
+
 par(mfrow = c(2, 2))
 plot(lm.x)
 ```
 
-The time series plot of x shows a linear trend. After performing a linear regression on the model on time, there seems to be some nonconstant variance in the residual plot, so to help with model selection, we also built some models with log(x)
+Clearly, the linear trend we observed previously is present and not due to randomness, because the regression model & parameter estimate are significant, and the residuals look relatively good. Also, there may be some nonconstant variance in the residual plot.
 
+We will make use of these insights as we attempt to fit an ARIMA/SARIMA model.
+
+### Model Building
+
+We use the regression results to guide us in model fitting. Since there's a linear trend, we will difference the data. In addition, we will attempt building some models with log(x) due to possible heteroscedasticity. 
 
 
 <!-- ## Model Building With X -->
