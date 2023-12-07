@@ -31,10 +31,11 @@ We wanted to explore flight delays overall, and over the course of the project p
 
 Before we did any analysis, we began by loading the data and manipulating it into a format we can use. We created a column for dates, removed categorical variables, and aggregated the data for each month.
 
-```{r, results='hide', warning=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+```{r, results='hide'}
 # setup
 library(astsa)
-delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv") 
+delays <- 
+  read.csv("https://raw.githubusercontent.com/nekalik/STAT-335/main/d.csv") 
 
 # formatting dates
 delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
