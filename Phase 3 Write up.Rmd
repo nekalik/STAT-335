@@ -189,6 +189,3 @@ Jawad Khattak, 2022. *"Flight Delay from January 2017 - July 2022."* Kaggle.com,
 U.S. Centers for Disease Control and Prevention (CDC), 2023. *"CDC Museum COVID-19 Timeline."* CDC website, https://www.cdc.gov/museum/timeline/covid19.html.
 
 U.S. Department of Transportation: Bureau of Transportation Statistics (BTS), 2022. *"Airline On-Time Statistics and Delay Causes."* BTS website, https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp.
-U.S. Centers for Disease Control and Prevention (CDC), 2023. *"CDC Museum COVID-19 Timeline."* CDC website, https://www.cdc.gov/museum/timeline/covid19.html.
-
-U.S. Department of Transportation: Bureau of Transportation Statistics (BTS), 2022. *"Airline On-Time Statistics and Delay Causes."* BTS website, https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp.
