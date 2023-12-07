@@ -35,7 +35,7 @@ Before we did any analysis, we began by loading the data and manipulating it int
 # setup
 library(astsa)
 delays <- 
-  read.csv("https://raw.githubusercontent.com/nekalik/STAT-335/main/d.csv") 
+  read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/d.csv")
 
 # formatting dates
 delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
@@ -128,7 +128,11 @@ $ARIMA_{log(x)}(1,1,0)$ & $-0.1974$   & -0.1086     & significant               
 After carefully comparing the models based on the criteria listed in the table, we believe $MA_{log(x)}(2)$ is the best model for this data set (see below for its residuals). It is the best across all categories except the BIC, but there is only a difference of ~0.02 with another model's BIC, and we know that the BIC favors models with less parameters. Therefore, we proceed with this model to do forecasting.
 
 ```{r, results='hide'}
-sarima(log(x), p=0, d=0, q=2)
+ma2 = sarima(log(x), p=0, d=0, q=2)
+```
+
+```{r}
+ma2$ttable
 ```
 
 ### Forecasting
@@ -159,8 +163,11 @@ In addition, the graph gives insight into the degree of COVID's impact on flight
 
 We'd also like to briefly justify the large dip in flight delays starting 2020. For instance, COVID may have caused flight attendants to leave their jobs to avoid infection from the many passengers they interact with. Crew shortages might lead to flight delays. Therefore, why did the number of delays drop so dramatically? Logically, less people traveled due to the pandemic, so there were less flights, less flights that had the potential of being delayed, and thus less delays. We confirm this by examining the relationship between the number of delays and number of flights (we use the entire dataset to ensure our results are consistent):
 
-```{r}
+```{r, results='hide'}
 library(corrplot)
+```
+
+```{r}
 cor(sum_delays$arr_flights, sum_delays$arr_del15)
 
 lm.ratio = lm(arr_del15~arr_flights, data = sum_delays)
