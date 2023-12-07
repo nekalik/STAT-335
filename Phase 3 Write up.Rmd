@@ -6,6 +6,7 @@ output: pdf_document
 fontsize: 12pt
 header-includes:
   - \usepackage[margin=1in]{geometry}
+  - \usepackage{float}
 ---
 
 ```{r setup, include=FALSE}
@@ -30,10 +31,10 @@ Since the dataset includes 2020, we wonder if the effects of COVID are seen with
 
 Before we did any analysis, we began by loading the data and manipulating it into a format we can use. We created a column for dates, removed categorical variables, and aggregated the data for each month.
 
-```{r, results='hide', warning=FALSE}
+```{r, results='hide', warning=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 # setup
 library(astsa)
-delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv")
+delays <- read.csv("https://raw.githubusercontent.com/nekalik/STAT-335-Project/main/Airline_Delay_Cause.csv") 
 
 # formatting dates
 delays$date = as.Date(paste(delays$year, delays$month, 1, sep = "-"))
@@ -50,14 +51,15 @@ sum_delays= aggregate(.~date, sub_delays,sum)
 First, we view the number of delays over the entire span of the dataset.
 
 ```{r}
-# total number of delays
-tsplot(x=sum_delays$date,y=sum_delays$arr_del15)
+# Plot number of delays 
+tsplot(x=sum_delays$date,y=sum_delays$arr_del15, 
+       ylab = 'Number of Delays', main = 'Delay over Time')
 ```
 
 It does appear that COVID had an impact on delays around 2020. We created a data frame exclusively for pre-COVID data to examine the behavior of delays before January 2020, when COVID spread to the US (CDC, 2023).
 
 ```{r}
-# pre-COVID data
+# store only pre-COVID data
 sum_delays_pre = sum_delays[sum_delays$date<'2020-01-01', ]
 ```
 
@@ -69,8 +71,8 @@ x = sum_delays_pre$arr_del15
 
 xx = sum_delays_pre$date
 
-# time series plot
-tsplot(x=xx, y=x)
+# plot number of delays for only pre-COVID time
+tsplot(x=xx, y=x, main =" Pre-COVID Data", ylab = "Number of Delays")
 ```
 
 Before 2020, it appears that there's a linear trend, so we fit a linear regression model to investigate further.
@@ -78,13 +80,16 @@ Before 2020, it appears that there's a linear trend, so we fit a linear regressi
 ### Linear Regression
 
 ```{r}
+#build a regression model
 lm.x = lm(x~sum_delays_pre$date)
-
-plot(x=xx, y=x)
-abline(lm.x)
-
 summary(lm.x)
 
+#plot regression line with data
+plot(x=xx, y=x, xlab = 'Time', 
+     ylab = 'Number of Delays', main ='Delay vs Time ')
+abline(lm.x)
+
+#look at residual
 par(mfrow = c(2, 2))
 plot(lm.x)
 ```
@@ -102,16 +107,16 @@ From the time series plot of the number of delays vs time, there seems to be sea
 After examining the acf and pacf of x and log(x), we came up with potential models for our data. We compare them in the table below. For the "Residual" criteria, we want the following: the standardized residuals are white noise-like, ACF within the confidence bands, the Q-Q plot seems to be straight, and the p-values for the Ljung-Box statistic are above 0.05 (higher is better). The best white noise-like model is noted with ++. The AIC and AICc are close to each other, so we only included the AIC and BIC in the table.
 
 ```{=tex}
-\begin{table}[]
+\begin{table}[H]
 \centering
 \begin{tabular}{|l|l|l|l|l|}
 \hline
-Model                   &  AIC        & BIC         & Parameter Significance          & Residual   \\ \hline
+\textbf{Model}      &  \textbf{AIC}        & \textbf{BIC}& \textbf{Parameter Significance}          & \textbf{Residual}   \\ \hline
 $AR_x(1)$               & $22.6247$   &  22.7567    & significant                     &   +         \\ \hline
 $MA_x(2)$               & $22.597 $   & 22.7730     & significant                     &   ++        \\ \hline
 $ARIMA_x(0,1,2)$        & $22.7382$   & 22.9159     & significant                     &   -         \\ \hline
 $ARIMA_{log(x)}(1,1,1)$ & $-0.1735$   & -0.0402     & $ma_1$ not significant          &   +         \\ \hline
-$MA_{log(x)}(2)$        & $-0.2596$   & -0.0837     & significant                     &   ++        \\ \hline
+$\mathbf{MA_{log(x)}(2)}$        & $\mathbf{-0.2596}$   & \textbf{-0.0837}     & \textbf{significant}                     &   \textbf{++}        \\ \hline
 $ARIMA_{log(x)}(1,1,0)$ & $-0.1974$   & -0.1086     & significant                     &   +-        \\ \hline
 \end{tabular}
 \end{table}
@@ -139,8 +144,10 @@ The forecast converges at around 11.5, a constant. Since we used log(x), this is
 Since we saw a large dip in the original data due to COVID, our forecast shows what the data may have looked like if COVID didn't occur. We also would like to see when the flight delays "recovered" from COVID (the time where post-COVID data catches up to the forecast trend).
 
 ```{R}
+#plot forecast on the whole data set (Pre-Covid + Covid)
 prediction = sar.log$pred
-tsplot(log(sum_delays$arr_del15), xlim=c(0,70), ylim=c(9,13),lty = 1, lwd=1)
+tsplot(log(sum_delays$arr_del15), ylim=c(9,13),lty = 1, lwd=1, 
+       main = "Actual vs Forecast", ylab = "Sum of Log Delay")
 lines(prediction, col=4, lty=2, lwd=1.5 )
 legend(0,10, legend = c("actual", "forecast"), col=c(1,4), lty = c(1,2))
 ```
@@ -163,6 +170,7 @@ abline(lm.ratio)
 
 The correlation coefficient is strongly positive, so overall, delays increase as flights increase. This is also supported by the plot. Therefore, it makes sense for COVID to cause the number of delays to decrease due to less people flying.
 
+
 ## Conclusion
 
 <!-- Be sure to provide a clearly articulated answer to your research question that is well-supported by your analysis. -->
@@ -171,6 +179,9 @@ The correlation coefficient is strongly positive, so overall, delays increase as
 
 Jawad Khattak, 2022. *"Flight Delay from January 2017 - July 2022."* Kaggle.com, https://www.kaggle.com/datasets/jawadkhattak/us-flight-delay-from-january-2017-july-2022.
 
+U.S. Centers for Disease Control and Prevention (CDC), 2023. *"CDC Museum COVID-19 Timeline."* CDC website, https://www.cdc.gov/museum/timeline/covid19.html.
+
+U.S. Department of Transportation: Bureau of Transportation Statistics (BTS), 2022. *"Airline On-Time Statistics and Delay Causes."* BTS website, https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp.
 U.S. Centers for Disease Control and Prevention (CDC), 2023. *"CDC Museum COVID-19 Timeline."* CDC website, https://www.cdc.gov/museum/timeline/covid19.html.
 
 U.S. Department of Transportation: Bureau of Transportation Statistics (BTS), 2022. *"Airline On-Time Statistics and Delay Causes."* BTS website, https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp.
