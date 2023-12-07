@@ -170,7 +170,6 @@ abline(lm.ratio)
 
 The correlation coefficient is strongly positive, so overall, delays increase as flights increase. This is also supported by the plot. Therefore, it makes sense for COVID to cause the number of delays to decrease due to less people flying.
 
-
 ## Conclusion
 
 With the dataset spanning the COVID outbreak in the U.S. in 2020, we explored the pandemic's potential effects. By examining the behavior of flight delays before January 2020, we were able to measure the impact of COVID-19 on one aspect of the U.S. transportation system. 
