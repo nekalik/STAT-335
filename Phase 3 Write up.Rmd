@@ -18,7 +18,7 @@ The dataset was found compiled on Kaggle (Jawad Khattak, 2022), originally from 
 
 The data describes U.S. flight delays from January 2017 - July 2022. Some variables included are the year and month of data collection, airline carrier, airport, the number of flights delayed due to a specific reason (air carrier, weather, National Aviation System, security issue, previous flight delayed), and the total time (minutes) of delay due to a specific reason.
 
-Since the dataset includes 2020, we wonder if the effects of COVID are seen with flight delays, and if so, how it caused the delays to change over time.
+We wanted to explore flight delays overall, and over the course of the project phases, we narrowed down our focus. Since the dataset includes 2020, we wonder if the effects of COVID are seen with flight delays, and if so, how it caused the delays to change over time.
 
 ## The Research Question
 
@@ -166,6 +166,24 @@ The correlation coefficient is strongly positive, so overall, delays increase as
 ## Conclusion
 
 <!-- Be sure to provide a clearly articulated answer to your research question that is well-supported by your analysis. -->
+
+
+The data describes U.S. flight delays from January 2017 - July 2022. Some variables included are the year and month of data collection, airline carrier, airport, the number of flights delayed due to a specific reason (air carrier, weather, National Aviation System, security issue, previous flight delayed), and the total time (minutes) of delay due to a specific reason.
+
+Since the dataset includes 2020, we wonder if the effects of COVID are seen with flight delays, and if so, how it caused the delays to change over time.
+
+**What is the impact of COVID-19 on flight delays?**
+
+
+With the dataset spanning the COVID outbreak in the U.S. in 2020, we explored the pandemic's potential effects. By examining the behavior of flight delays before January 2020, we were able to measure the impact of COVID-19 on one aspect of the U.S. transportation system. 
+
+We initially observed the total number of delays dropping significantly around the beginning of 2020, indicating that COVID did have an impact. We must learn how flights delays normally behave in order to know the significance of the impact. After doing some exploratory analysis, we fit a model to pre-COVID data. Out of the model candidates, we found that the best was an MA(2) model on log-transformed delays. 
+
+This model was used to develop a forecast for the number of flight delays, allowing us to see what delays might have been like, had the pandemic not happened. We discovered that after the onset of COVID, the number of delays return to the forecasted amount after a little more than a year - it took a moderate amount of time for flight delays to "recover". This makes sense since the number of delays are highly correlated with the number of flights, so when the pandemic shutdown happened, the delays also decreased, and when things opened back up and travel resumed, the number of delays rose.
+
+Seeing how flights were impacted after an influential event such as COVID-19, we can see that the transportation sector, although susceptible and quickly affected, can recover from industry shocks, and do so moderately quickly. Although the pandemic was a cause for concern at first, it seems like air travel remains important to the U.S.
+
+In the future, other aspects of air travel can be explored using this dataset or others. Chiefly, one can examine the causes of delays and their possible autocorrelated "domino effects" to hopefully learn how delays can be mitigated.
 
 ## References
 
