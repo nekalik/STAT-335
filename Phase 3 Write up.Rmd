@@ -163,16 +163,16 @@ In addition, the graph gives insight into the degree of COVID's impact on flight
 
 We'd also like to briefly justify the large dip in flight delays starting 2020. For instance, COVID may have caused flight attendants to leave their jobs to avoid infection from the many passengers they interact with. Crew shortages might lead to flight delays. Therefore, why did the number of delays drop so dramatically? Logically, less people traveled due to the pandemic, so there were less flights, less flights that had the potential of being delayed, and thus less delays. We confirm this by examining the relationship between the number of delays and number of flights (we use the entire dataset to ensure our results are consistent):
 
-```{r, results='hide'}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 library(corrplot)
 ```
 
 ```{r}
 cor(sum_delays$arr_flights, sum_delays$arr_del15)
-
 lm.ratio = lm(arr_del15~arr_flights, data = sum_delays)
 
-plot(sum_delays$arr_flights, sum_delays$arr_del15)
+plot(sum_delays$arr_flights, sum_delays$arr_del15, 
+     xlab = "Total Number of Flights", ylab="Number of Delays")
 abline(lm.ratio)
 ```
 
